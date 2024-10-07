@@ -1,77 +1,58 @@
 package solve
 
-import (
-	"fmt"
-)
-
-func CheckValid(board [4][4]int) bool {
-	boardCheck := [][]int{
-		{0, 1, 5, 4},
-		{3, 2, 6, 7},
-		{12, 8, 9, 13},
-		{15, 10, 11, 14},
-		{0, 4, 8, 12},
-		{1, 5, 9, 13},
-		{2, 6, 10, 14},
-		{3, 7, 11, 15},
-		{0, 1, 2, 3},
-		{4, 5, 6, 7},
-		{8, 9, 10, 11},
-		{12, 13, 14, 15},
-	}
+func Solve(board [4][4]int, row, col int) bool {
 	// check quadrants
-	for _, group := range boardCheck {
-		eles := make([]int, 4)
-		for _, n := range group {
-			row, col := IToMatCoord(n, 4, 4)
-			ele := board[row][col]
-			eles = append(eles, ele)
+
+	if row == 3 && col == 4 {
+		return true
+	}
+	if col == 4 {
+		row++
+		col = 0
+	}
+
+	if board[row][col] != 0 {
+		Solve(board, row, col+1)
+	}
+
+	for i := range 4 {
+		if IsPossible(board, row, col, 1) {
+			board[row][col] = i + 1
+			if Solve(board, row, col+1) {
+				return true
+			}
 		}
-		fmt.Println("checking if", eles, "is unique")
-		if !IsUnique(eles) {
+		board[row][col] = 0
+	}
+
+	return false
+}
+
+func IsPossible(board [4][4]int, row, col, e int) bool {
+	// check for element in similar row
+	for _, num := range board[row] {
+		if num == e {
 			return false
 		}
 	}
 
-	return true
-}
-
-func BackTrackSolve(board [4][4]int) {
-	for i, row := range board {
-		for j := range row {
-			k := 1
-			board[i][j] = k
-			for !CheckValid(board) && k < 4 {
-				k++
-				board[i][j] = k
-			}
-
-			if !CheckValid(board) {
-			}
-		}
-	}
-}
-
-func IsUnique(nums []int) bool {
-	hashset := make(map[int]struct{})
-	for _, n := range nums {
-		if n == 0 {
-			continue
-		}
-		if _, ok := hashset[n]; ok {
+	for _, rows := range board {
+		if rows[col] == e {
 			return false
 		}
-		hashset[n] = struct{}{}
 	}
+
+	// start row and column of subgrid
+	startRow, startCol := row-row%2, col-col%2
+
+	// traverse assuming 2 by 2 subgrid
+	for i := startRow; i < 2; i++ {
+		for j := startCol; j < 2; j++ {
+			if board[i][j] == e {
+				return false
+			}
+		}
+	}
+
 	return true
-}
-
-func IToMatCoord(i, rows, cols int) (row, col int) {
-	row = i / rows
-	col = i % cols
-	return
-}
-
-func MatCoordToI(row, col, rows, cols int) int {
-	return row*cols + col
 }

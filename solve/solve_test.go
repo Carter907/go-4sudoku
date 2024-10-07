@@ -7,21 +7,32 @@ import (
 )
 
 func TestSolve(t *testing.T) {
-	if row, col := solve.IToMatCoord(7, 4, 4); row != 1 || col != 3 {
-		t.Fail()
-	} else {
-		t.Log("row:", row, "col:", col)
+	board := [4][4]int{
+		{1, 2, 0, 3},
+		{0, 0, 0, 0},
+		{0, 0, 0, 0},
+		{0, 0, 0, 0},
 	}
-	row, col := solve.IToMatCoord(7, 4, 4)
-	if i := solve.MatCoordToI(row, col, 4, 4); i != 7 {
-		t.Fail()
-	} else {
-		t.Log("i:", 7)
+
+	solve.Solve(board, 0, 0)
+	t.Log(board)
+}
+
+func TestRange(t *testing.T) {
+	for i := range 4 {
+		t.Log(i)
 	}
 }
 
-func TestUnique(t *testing.T) {
-	if !solve.IsUnique([]int{1, -1, -1, 4}) {
-		t.Fatal("whatt")
+func TestIsPossible(t *testing.T) {
+	board := [4][4]int{
+		{1, 2, 0, 3},
+		{0, 0, 0, 0},
+		{0, 0, 0, 0},
+		{0, 0, 0, 0},
+	}
+
+	if !solve.IsPossible(board, 1, 1, 3) {
+		t.Fail()
 	}
 }

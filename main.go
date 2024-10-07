@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Carter907/go-4sodoku/solve"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -14,9 +15,8 @@ const (
 )
 
 type model struct {
-	board    [BoardRows][BoardCols]int // items on the to-do list
-	cursor   [2]int                    // which to-do list item our cursor is pointing at
-	selected map[int]struct{}          // which to-do items are selected
+	board  [BoardRows][BoardCols]int // items on the to-do list
+	cursor [2]int                    // which to-do list item our cursor is pointing at
 }
 
 func (m model) Init() tea.Cmd {
@@ -91,6 +91,7 @@ func (m model) View() string {
 
 func initialModel() model {
 	board := [4][4]int{}
+	solve.Solve(board, 0, 0)
 
 	return model{
 		board: board,
