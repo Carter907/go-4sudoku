@@ -4,19 +4,22 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Carter907/go-4sodoku/consts"
 	"github.com/Carter907/go-4sodoku/solve"
+
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 const (
-	BoardRows  = 4
-	BoardCols  = 4
-	Sparseness = 1
+	Rows       = consts.Rows
+	Cols       = consts.Cols
+	Sparseness = consts.Sparseness
 )
 
 type model struct {
-	board  [BoardRows][BoardCols]int // items on the to-do list
-	cursor [2]int                    // which to-do list item our cursor is pointing at
+	board  [Rows][Cols]int // items on the to-do list
+	cursor [2]int          // which to-do list item our cursor is pointing at
+	solved bool
 }
 
 func (m model) Init() tea.Cmd {
@@ -25,6 +28,10 @@ func (m model) Init() tea.Cmd {
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	possibleChoices := [Rows]int{}
+	for i := range Rows {
+		possibleChoices[i] = i + 1
+	}
 	switch msg := msg.(type) {
 	// Is it a key press?
 	case tea.KeyMsg:
@@ -44,7 +51,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// The "down" and "j" keys move the cursor down
 		case "down", "j":
-			if m.cursor[0] < BoardRows-1 {
+			if m.cursor[0] < Rows-1 {
 				m.cursor[0]++
 			}
 		case "left", "h":
@@ -53,9 +60,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		case "right", "l":
-			if m.cursor[1] < BoardCols-1 {
+			if m.cursor[1] < Cols-1 {
 				m.cursor[1]++
 			}
+		case "enter":
 
 		}
 	}
@@ -67,15 +75,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() string {
 	// The header
-	s := "Solve the 4 by 4 Sudoku\n\n"
+	s := fmt.Sprintf("Solve the %d by %d Sudoku\n\n", Rows, Cols)
 
 	// Iterate over our choices
-	for _, row := range m.board {
-		for _, num := range row {
+	for i, row := range m.board {
+		for j, num := range row {
 			if num == -1 {
 				s += " [ ]"
 			} else {
-				s += fmt.Sprintf(" [%d]", num)
+				if i == m.cursor[0] && j == m.cursor[1] {
+					s += " [<]"
+				} else {
+					s += fmt.Sprintf(" [%d]", num)
+				}
 			}
 		}
 		// Render the row
@@ -90,8 +102,9 @@ func (m model) View() string {
 }
 
 func initialModel() model {
-	board := [4][4]int{}
-	solve.Solve(board, 0, 0)
+	board := [Rows][Cols]int{}
+	solve.Solve(&board, 0, 0)
+	solve.Sparcify(&board, Sparseness)
 
 	return model{
 		board: board,
